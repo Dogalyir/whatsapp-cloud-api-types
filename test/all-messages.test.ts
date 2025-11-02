@@ -1,14 +1,15 @@
 import { describe, expect, test } from 'bun:test'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { MessagesWebhookSchema } from '../src/webhooks/messages'
 
 // Load all message examples from JSON file
-const allMessagesJson = JSON.parse(
-	readFileSync(join(__dirname, '../json/all_messages.json'), 'utf-8'),
-)
+const allMessagesPath = join(__dirname, '../json/all_messages.json')
+const allMessagesJson = existsSync(allMessagesPath)
+	? JSON.parse(readFileSync(allMessagesPath, 'utf-8'))
+	: null
 
-describe('All incoming messages validation', () => {
+describe.skipIf(!allMessagesJson)('All incoming messages validation', () => {
 	test('should parse text message', () => {
 		const textMessage = allMessagesJson[0]
 		const result = MessagesWebhookSchema.parse(textMessage)

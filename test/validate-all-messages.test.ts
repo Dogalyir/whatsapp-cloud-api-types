@@ -1,36 +1,41 @@
 import { expect, test } from 'bun:test'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { MessagesWebhookSchema } from '../src/webhooks/messages'
 
 // Read the all_messages.json file
 const allMessagesPath = join(import.meta.dir, '..', 'json', 'all_messages.json')
-const allMessagesJson = JSON.parse(readFileSync(allMessagesPath, 'utf-8'))
+const allMessagesJson = existsSync(allMessagesPath)
+	? JSON.parse(readFileSync(allMessagesPath, 'utf-8'))
+	: null
 
-test('all message examples should validate against MessagesWebhookSchema', () => {
-	// The JSON file is an array of webhook objects
-	expect(Array.isArray(allMessagesJson)).toBe(true)
-	expect(allMessagesJson.length).toBeGreaterThan(0)
+test.skipIf(!allMessagesJson)(
+	'all message examples should validate against MessagesWebhookSchema',
+	() => {
+		// The JSON file is an array of webhook objects
+		expect(Array.isArray(allMessagesJson)).toBe(true)
+		expect(allMessagesJson.length).toBeGreaterThan(0)
 
-	// Test each webhook example
-	allMessagesJson.forEach((webhook, index) => {
-		const result = MessagesWebhookSchema.safeParse(webhook)
+		// Test each webhook example
+		allMessagesJson.forEach((webhook, index) => {
+			const result = MessagesWebhookSchema.safeParse(webhook)
 
-		if (!result.success) {
-			console.error(`\n❌ Webhook at index ${index} failed validation:`)
-			console.error('Webhook data:', JSON.stringify(webhook, null, 2))
-			console.error('Validation errors:', result.error.format())
-		}
+			if (!result.success) {
+				console.error(`\n❌ Webhook at index ${index} failed validation:`)
+				console.error('Webhook data:', JSON.stringify(webhook, null, 2))
+				console.error('Validation errors:', result.error.format())
+			}
 
-		expect(result.success).toBe(true)
-	})
+			expect(result.success).toBe(true)
+		})
 
-	console.log(
-		`\n✅ All ${allMessagesJson.length} webhook examples validated successfully!`,
-	)
-})
+		console.log(
+			`\n✅ All ${allMessagesJson.length} webhook examples validated successfully!`,
+		)
+	},
+)
 
-test('validate text message', () => {
+test.skipIf(!allMessagesJson)('validate text message', () => {
 	const textWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return (
@@ -48,7 +53,7 @@ test('validate text message', () => {
 	).toBeDefined()
 })
 
-test('validate audio message', () => {
+test.skipIf(!allMessagesJson)('validate audio message', () => {
 	const audioWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.type === 'audio'
@@ -63,7 +68,7 @@ test('validate audio message', () => {
 	).toBeDefined()
 })
 
-test('validate button message', () => {
+test.skipIf(!allMessagesJson)('validate button message', () => {
 	const buttonWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.type === 'button'
@@ -81,7 +86,7 @@ test('validate button message', () => {
 	).toBeDefined()
 })
 
-test('validate contacts message', () => {
+test.skipIf(!allMessagesJson)('validate contacts message', () => {
 	const contactsWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.type === 'contacts'
@@ -96,7 +101,7 @@ test('validate contacts message', () => {
 	).toBe(true)
 })
 
-test('validate document message', () => {
+test.skipIf(!allMessagesJson)('validate document message', () => {
 	const documentWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.type === 'document'
@@ -111,7 +116,7 @@ test('validate document message', () => {
 	).toBeDefined()
 })
 
-test('validate image message', () => {
+test.skipIf(!allMessagesJson)('validate image message', () => {
 	const imageWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.type === 'image'
@@ -123,51 +128,57 @@ test('validate image message', () => {
 	expect(result.entry[0].changes[0].value.messages?.[0].image).toBeDefined()
 })
 
-test('validate interactive message with list_reply', () => {
-	const interactiveWebhook = allMessagesJson.find((w) => {
-		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
-		return (
-			messages?.[0]?.type === 'interactive' &&
-			messages?.[0]?.interactive?.type === 'list_reply'
+test.skipIf(!allMessagesJson)(
+	'validate interactive message with list_reply',
+	() => {
+		const interactiveWebhook = allMessagesJson.find((w) => {
+			const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
+			return (
+				messages?.[0]?.type === 'interactive' &&
+				messages?.[0]?.interactive?.type === 'list_reply'
+			)
+		})
+
+		expect(interactiveWebhook).toBeDefined()
+		const result = MessagesWebhookSchema.parse(interactiveWebhook)
+		expect(result.entry[0].changes[0].value.messages?.[0].type).toBe(
+			'interactive',
 		)
-	})
+		expect(
+			result.entry[0].changes[0].value.messages?.[0].interactive?.type,
+		).toBe('list_reply')
+		expect(
+			result.entry[0].changes[0].value.messages?.[0].interactive?.list_reply,
+		).toBeDefined()
+	},
+)
 
-	expect(interactiveWebhook).toBeDefined()
-	const result = MessagesWebhookSchema.parse(interactiveWebhook)
-	expect(result.entry[0].changes[0].value.messages?.[0].type).toBe(
-		'interactive',
-	)
-	expect(result.entry[0].changes[0].value.messages?.[0].interactive?.type).toBe(
-		'list_reply',
-	)
-	expect(
-		result.entry[0].changes[0].value.messages?.[0].interactive?.list_reply,
-	).toBeDefined()
-})
+test.skipIf(!allMessagesJson)(
+	'validate interactive message with button_reply',
+	() => {
+		const interactiveWebhook = allMessagesJson.find((w) => {
+			const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
+			return (
+				messages?.[0]?.type === 'interactive' &&
+				messages?.[0]?.interactive?.type === 'button_reply'
+			)
+		})
 
-test('validate interactive message with button_reply', () => {
-	const interactiveWebhook = allMessagesJson.find((w) => {
-		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
-		return (
-			messages?.[0]?.type === 'interactive' &&
-			messages?.[0]?.interactive?.type === 'button_reply'
+		expect(interactiveWebhook).toBeDefined()
+		const result = MessagesWebhookSchema.parse(interactiveWebhook)
+		expect(result.entry[0].changes[0].value.messages?.[0].type).toBe(
+			'interactive',
 		)
-	})
+		expect(
+			result.entry[0].changes[0].value.messages?.[0].interactive?.type,
+		).toBe('button_reply')
+		expect(
+			result.entry[0].changes[0].value.messages?.[0].interactive?.button_reply,
+		).toBeDefined()
+	},
+)
 
-	expect(interactiveWebhook).toBeDefined()
-	const result = MessagesWebhookSchema.parse(interactiveWebhook)
-	expect(result.entry[0].changes[0].value.messages?.[0].type).toBe(
-		'interactive',
-	)
-	expect(result.entry[0].changes[0].value.messages?.[0].interactive?.type).toBe(
-		'button_reply',
-	)
-	expect(
-		result.entry[0].changes[0].value.messages?.[0].interactive?.button_reply,
-	).toBeDefined()
-})
-
-test('validate location message', () => {
+test.skipIf(!allMessagesJson)('validate location message', () => {
 	const locationWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.type === 'location'
@@ -185,7 +196,7 @@ test('validate location message', () => {
 	).toBeDefined()
 })
 
-test('validate order message', () => {
+test.skipIf(!allMessagesJson)('validate order message', () => {
 	const orderWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.type === 'order'
@@ -203,7 +214,7 @@ test('validate order message', () => {
 	).toBeDefined()
 })
 
-test('validate reaction message', () => {
+test.skipIf(!allMessagesJson)('validate reaction message', () => {
 	const reactionWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.type === 'reaction'
@@ -218,7 +229,7 @@ test('validate reaction message', () => {
 	).toBeDefined()
 })
 
-test('validate sticker message', () => {
+test.skipIf(!allMessagesJson)('validate sticker message', () => {
 	const stickerWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.type === 'sticker'
@@ -230,7 +241,7 @@ test('validate sticker message', () => {
 	expect(result.entry[0].changes[0].value.messages?.[0].sticker).toBeDefined()
 })
 
-test('validate video message', () => {
+test.skipIf(!allMessagesJson)('validate video message', () => {
 	const videoWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.type === 'video'
@@ -242,7 +253,7 @@ test('validate video message', () => {
 	expect(result.entry[0].changes[0].value.messages?.[0].video).toBeDefined()
 })
 
-test('validate system message', () => {
+test.skipIf(!allMessagesJson)('validate system message', () => {
 	const systemWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.type === 'system'
@@ -254,7 +265,7 @@ test('validate system message', () => {
 	expect(result.entry[0].changes[0].value.messages?.[0].system).toBeDefined()
 })
 
-test('validate message with context', () => {
+test.skipIf(!allMessagesJson)('validate message with context', () => {
 	const contextWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.context
@@ -271,28 +282,31 @@ test('validate message with context', () => {
 	).toBeDefined()
 })
 
-test('validate message with referred_product in context', () => {
-	const referredProductWebhook = allMessagesJson.find((w) => {
-		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
-		return messages?.[0]?.context?.referred_product
-	})
+test.skipIf(!allMessagesJson)(
+	'validate message with referred_product in context',
+	() => {
+		const referredProductWebhook = allMessagesJson.find((w) => {
+			const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
+			return messages?.[0]?.context?.referred_product
+		})
 
-	expect(referredProductWebhook).toBeDefined()
-	const result = MessagesWebhookSchema.parse(referredProductWebhook)
-	expect(
-		result.entry[0].changes[0].value.messages?.[0].context?.referred_product,
-	).toBeDefined()
-	expect(
-		result.entry[0].changes[0].value.messages?.[0].context?.referred_product
-			?.catalog_id,
-	).toBeDefined()
-	expect(
-		result.entry[0].changes[0].value.messages?.[0].context?.referred_product
-			?.product_retailer_id,
-	).toBeDefined()
-})
+		expect(referredProductWebhook).toBeDefined()
+		const result = MessagesWebhookSchema.parse(referredProductWebhook)
+		expect(
+			result.entry[0].changes[0].value.messages?.[0].context?.referred_product,
+		).toBeDefined()
+		expect(
+			result.entry[0].changes[0].value.messages?.[0].context?.referred_product
+				?.catalog_id,
+		).toBeDefined()
+		expect(
+			result.entry[0].changes[0].value.messages?.[0].context?.referred_product
+				?.product_retailer_id,
+		).toBeDefined()
+	},
+)
 
-test('validate message with referral', () => {
+test.skipIf(!allMessagesJson)('validate message with referral', () => {
 	const referralWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.referral
@@ -306,7 +320,7 @@ test('validate message with referral', () => {
 	).toBeDefined()
 })
 
-test('validate message with group_id', () => {
+test.skipIf(!allMessagesJson)('validate message with group_id', () => {
 	const groupWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.group_id
@@ -317,7 +331,7 @@ test('validate message with group_id', () => {
 	expect(result.entry[0].changes[0].value.messages?.[0].group_id).toBeDefined()
 })
 
-test('validate message with errors', () => {
+test.skipIf(!allMessagesJson)('validate message with errors', () => {
 	const errorMessageWebhook = allMessagesJson.find((w) => {
 		const messages = w.entry?.[0]?.changes?.[0]?.value?.messages
 		return messages?.[0]?.errors
@@ -331,7 +345,7 @@ test('validate message with errors', () => {
 	).toBe(true)
 })
 
-test('validate status update', () => {
+test.skipIf(!allMessagesJson)('validate status update', () => {
 	const statusWebhook = allMessagesJson.find((w) => {
 		const statuses = w.entry?.[0]?.changes?.[0]?.value?.statuses
 		return statuses && statuses.length > 0
@@ -344,21 +358,24 @@ test('validate status update', () => {
 	expect(result.entry[0].changes[0].value.statuses?.[0].status).toBeDefined()
 })
 
-test('validate status with conversation and pricing', () => {
-	const statusWebhook = allMessagesJson.find((w) => {
-		const statuses = w.entry?.[0]?.changes?.[0]?.value?.statuses
-		return statuses?.[0]?.conversation && statuses?.[0]?.pricing
-	})
+test.skipIf(!allMessagesJson)(
+	'validate status with conversation and pricing',
+	() => {
+		const statusWebhook = allMessagesJson.find((w) => {
+			const statuses = w.entry?.[0]?.changes?.[0]?.value?.statuses
+			return statuses?.[0]?.conversation && statuses?.[0]?.pricing
+		})
 
-	expect(statusWebhook).toBeDefined()
-	const result = MessagesWebhookSchema.parse(statusWebhook)
-	expect(
-		result.entry[0].changes[0].value.statuses?.[0].conversation,
-	).toBeDefined()
-	expect(result.entry[0].changes[0].value.statuses?.[0].pricing).toBeDefined()
-})
+		expect(statusWebhook).toBeDefined()
+		const result = MessagesWebhookSchema.parse(statusWebhook)
+		expect(
+			result.entry[0].changes[0].value.statuses?.[0].conversation,
+		).toBeDefined()
+		expect(result.entry[0].changes[0].value.statuses?.[0].pricing).toBeDefined()
+	},
+)
 
-test('validate status with errors', () => {
+test.skipIf(!allMessagesJson)('validate status with errors', () => {
 	const statusErrorWebhook = allMessagesJson.find((w) => {
 		const statuses = w.entry?.[0]?.changes?.[0]?.value?.statuses
 		return statuses?.[0]?.errors
@@ -372,15 +389,18 @@ test('validate status with errors', () => {
 	).toBe(true)
 })
 
-test('validate webhook with only errors in value', () => {
-	const errorsOnlyWebhook = allMessagesJson.find((w) => {
-		const value = w.entry?.[0]?.changes?.[0]?.value
-		return value?.errors && !value?.messages && !value?.statuses
-	})
+test.skipIf(!allMessagesJson)(
+	'validate webhook with only errors in value',
+	() => {
+		const errorsOnlyWebhook = allMessagesJson.find((w) => {
+			const value = w.entry?.[0]?.changes?.[0]?.value
+			return value?.errors && !value?.messages && !value?.statuses
+		})
 
-	expect(errorsOnlyWebhook).toBeDefined()
-	const result = MessagesWebhookSchema.parse(errorsOnlyWebhook)
-	expect(result.entry[0].changes[0].value.errors).toBeDefined()
-	expect(result.entry[0].changes[0].value.messages).toBeUndefined()
-	expect(result.entry[0].changes[0].value.statuses).toBeUndefined()
-})
+		expect(errorsOnlyWebhook).toBeDefined()
+		const result = MessagesWebhookSchema.parse(errorsOnlyWebhook)
+		expect(result.entry[0].changes[0].value.errors).toBeDefined()
+		expect(result.entry[0].changes[0].value.messages).toBeUndefined()
+		expect(result.entry[0].changes[0].value.statuses).toBeUndefined()
+	},
+)
