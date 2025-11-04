@@ -1,6 +1,6 @@
 # whatsapp-cloud-api-types
 
-TypeScript type definitions and Zod schemas for the WhatsApp Business Cloud API webhooks.
+TypeScript type definitions, Zod schemas, and a fully-typed API client for the WhatsApp Business Cloud API.
 
 [![npm version](https://img.shields.io/npm/v/whatsapp-cloud-api-types.svg)](https://www.npmjs.com/package/whatsapp-cloud-api-types)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -14,6 +14,13 @@ TypeScript type definitions and Zod schemas for the WhatsApp Business Cloud API 
 - 🔧 **Subscription management**: Type-safe schemas for WABA subscription APIs
 - 🚀 **Tree-shakeable**: Use only what you need
 - ✨ **Auto-completion**: Full IntelliSense support in your IDE
+- 🤖 **API Client**: Complete, type-safe WhatsApp Cloud API client with fetch-based requests
+- 📤 **Send Messages**: All message types supported (text, media, interactive, templates, etc.)
+- 📁 **Media Management**: Upload, download, and manage media files
+- 🏢 **Business Profile**: Manage business profile and settings
+- 🏦 **WABA Management**: Manage WhatsApp Business Accounts (owned and shared)
+- 📱 **Phone Numbers**: Manage phone numbers, verification status, and quality ratings
+- 🔔 **Webhooks**: Configure webhook subscriptions and callback URLs
 
 ## Installation
 
@@ -26,6 +33,64 @@ or with npm:
 ```bash
 npm install whatsapp-cloud-api-types zod
 ```
+
+## 🚀 Quick Start
+
+### Using the API Client
+
+```typescript
+import { WhatsAppCloudAPI } from 'whatsapp-cloud-api-types'
+
+const client = new WhatsAppCloudAPI({
+  accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+  phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID!,
+})
+
+// Send a text message
+await client.messages.sendText('1234567890', 'Hello, World!')
+
+// Send an image
+await client.messages.sendImage(
+  '1234567890',
+  { link: 'https://example.com/image.jpg' },
+  'Check this out!'
+)
+
+// Send interactive buttons
+await client.messages.sendInteractiveButtons('1234567890', {
+  type: 'button',
+  body: { text: 'Choose an option' },
+  action: {
+    buttons: [
+      { type: 'reply', reply: { id: 'yes', title: 'Yes' } },
+      { type: 'reply', reply: { id: 'no', title: 'No' } }
+    ]
+  }
+})
+
+// Upload and send media
+const media = await client.media.upload(file, 'image/jpeg')
+await client.messages.sendImage('1234567890', { id: media.id })
+
+// Get business profile
+const profile = await client.business.getProfile()
+
+// Manage WhatsApp Business Accounts
+const waba = await client.waba.getFirst()
+const ownedWabas = await client.waba.getOwned()
+
+// Manage phone numbers
+const numbers = await client.phoneNumbers.list(waba!.id)
+const phoneNumber = await client.phoneNumbers.get('PHONE_NUMBER_ID')
+
+// Configure webhooks
+await client.webhooks.subscribe(waba!.id, {
+  override_callback_uri: 'https://myapp.com/webhook',
+  verify_token: 'my-secret-token',
+})
+```
+
+**[📖 Complete API Client Documentation →](./CLIENT_README.md)**
 
 ## Supported Features
 
@@ -76,7 +141,9 @@ Type-safe schemas for WhatsApp Business Account (WABA) subscription management:
 - ✅ **Unsubscribe from WABA** - Remove webhook subscriptions
 - ✅ **Override Callback URL** - Set alternate webhook endpoints per WABA
 
-## Quick Start
+## Webhook Handling
+
+### Quick Start
 
 ### Parse Any Webhook
 
@@ -478,10 +545,35 @@ bun test
 
 The test suite validates every message type, status update, and error scenario to ensure 100% compatibility with the WhatsApp Cloud API.
 
+## Package Structure
+
+This package provides two main features:
+
+1. **Webhook Type Definitions** - Zod schemas and TypeScript types for handling incoming webhooks
+2. **API Client** - Complete client for sending messages and managing your WhatsApp Business Account
+
+```typescript
+// Webhook handling
+import { WhatsAppWebhookSchema, MessagesWebhookSchema } from 'whatsapp-cloud-api-types'
+
+// API client
+import { WhatsAppCloudAPI } from 'whatsapp-cloud-api-types'
+
+// Individual schemas and types
+import type { Message, Status, BusinessProfile } from 'whatsapp-cloud-api-types'
+```
+
+## Documentation
+
+- **[API Client Guide](./CLIENT_README.md)** - Complete guide for sending messages and using the API
+- **[Webhook Examples](./test/webhooks/)** - Real webhook payload examples
+- **[Type Reference](#api-reference)** - Full schema and type documentation below
+
 ## Resources
 
 - [WhatsApp Cloud API Documentation](https://developers.facebook.com/docs/whatsapp/cloud-api)
 - [Webhook Reference](https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks)
+- [Message Types Guide](https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages)
 - [Zod Documentation](https://zod.dev)
 
 ## Support

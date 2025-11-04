@@ -3,9 +3,11 @@ import { z } from 'zod'
 /**
  * Template category values
  */
-export const TemplateCategorySchema: z.ZodType<
-	'AUTHENTICATION' | 'MARKETING' | 'UTILITY'
-> = z.enum(['AUTHENTICATION', 'MARKETING', 'UTILITY'])
+export const TemplateCategorySchema = z.enum([
+	'AUTHENTICATION',
+	'MARKETING',
+	'UTILITY',
+])
 
 export type TemplateCategory = z.infer<typeof TemplateCategorySchema>
 
@@ -13,13 +15,7 @@ export type TemplateCategory = z.infer<typeof TemplateCategorySchema>
  * Template category update value object for impending changes
  * (notification sent 24 hours before the change)
  */
-export const TemplateCategoryUpdateImpendingValueSchema: z.ZodType<{
-	message_template_id: number
-	message_template_name: string
-	message_template_language: string
-	correct_category: z.infer<typeof TemplateCategorySchema>
-	new_category: z.infer<typeof TemplateCategorySchema>
-}> = z.object({
+export const TemplateCategoryUpdateImpendingValueSchema = z.object({
 	/** The ID of the message template */
 	message_template_id: z.number().int(),
 	/** The name of the message template */
@@ -39,13 +35,7 @@ export type TemplateCategoryUpdateImpendingValue = z.infer<
 /**
  * Template category update value object for completed changes
  */
-export const TemplateCategoryUpdateCompletedValueSchema: z.ZodType<{
-	message_template_id: number
-	message_template_name: string
-	message_template_language: string
-	previous_category: z.infer<typeof TemplateCategorySchema>
-	new_category: z.infer<typeof TemplateCategorySchema>
-}> = z.object({
+export const TemplateCategoryUpdateCompletedValueSchema = z.object({
 	/** The ID of the message template */
 	message_template_id: z.number().int(),
 	/** The name of the message template */
@@ -65,10 +55,7 @@ export type TemplateCategoryUpdateCompletedValue = z.infer<
 /**
  * Template category update value object (union of impending and completed)
  */
-export const TemplateCategoryUpdateValueSchema: z.ZodType<
-	| z.infer<typeof TemplateCategoryUpdateImpendingValueSchema>
-	| z.infer<typeof TemplateCategoryUpdateCompletedValueSchema>
-> = z.union([
+export const TemplateCategoryUpdateValueSchema = z.union([
 	TemplateCategoryUpdateImpendingValueSchema,
 	TemplateCategoryUpdateCompletedValueSchema,
 ])
@@ -80,10 +67,7 @@ export type TemplateCategoryUpdateValue = z.infer<
 /**
  * Change object for template category update
  */
-export const TemplateCategoryUpdateChangeSchema: z.ZodType<{
-	value: z.infer<typeof TemplateCategoryUpdateValueSchema>
-	field: 'template_category_update'
-}> = z.object({
+export const TemplateCategoryUpdateChangeSchema = z.object({
 	value: TemplateCategoryUpdateValueSchema,
 	field: z.literal('template_category_update'),
 })
@@ -95,11 +79,7 @@ export type TemplateCategoryUpdateChange = z.infer<
 /**
  * Entry object for template category update
  */
-export const TemplateCategoryUpdateEntrySchema: z.ZodType<{
-	id: string
-	time: number
-	changes: Array<z.infer<typeof TemplateCategoryUpdateChangeSchema>>
-}> = z.object({
+export const TemplateCategoryUpdateEntrySchema = z.object({
 	/** The WhatsApp Business Account ID */
 	id: z.string(),
 	/** Unix timestamp indicating when the webhook was triggered */
@@ -114,10 +94,7 @@ export type TemplateCategoryUpdateEntry = z.infer<
 /**
  * Complete webhook payload for template_category_update
  */
-export const TemplateCategoryUpdateWebhookSchema: z.ZodType<{
-	object: 'whatsapp_business_account'
-	entry: Array<z.infer<typeof TemplateCategoryUpdateEntrySchema>>
-}> = z.object({
+export const TemplateCategoryUpdateWebhookSchema = z.object({
 	object: z.literal('whatsapp_business_account'),
 	entry: z.array(TemplateCategoryUpdateEntrySchema),
 })

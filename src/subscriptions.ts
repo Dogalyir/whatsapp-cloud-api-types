@@ -3,11 +3,7 @@ import { z } from 'zod'
 /**
  * WhatsApp Business API data object
  */
-export const WhatsAppBusinessAPIDataSchema: z.ZodType<{
-	id: string
-	link: string
-	name: string
-}> = z.object({
+export const WhatsAppBusinessAPIDataSchema = z.object({
 	/** App ID */
 	id: z.string(),
 	/** App link */
@@ -23,13 +19,7 @@ export type WhatsAppBusinessAPIData = z.infer<
 /**
  * Subscribed app object
  */
-export const SubscribedAppSchema: z.ZodType<{
-	whatsapp_business_api_data: {
-		id: string
-		link: string
-		name: string
-	}
-}> = z.object({
+export const SubscribedAppSchema = z.object({
 	whatsapp_business_api_data: WhatsAppBusinessAPIDataSchema,
 })
 
@@ -38,14 +28,7 @@ export type SubscribedApp = z.infer<typeof SubscribedAppSchema>
 /**
  * Subscribed app with override callback URI
  */
-export const SubscribedAppWithOverrideSchema: z.ZodType<{
-	whatsapp_business_api_data: {
-		id: string
-		link: string
-		name: string
-	}
-	override_callback_uri: string
-}> = z.object({
+export const SubscribedAppWithOverrideSchema = z.object({
 	whatsapp_business_api_data: WhatsAppBusinessAPIDataSchema,
 	/** The alternate callback URL for this subscription */
 	override_callback_uri: z.string(),
@@ -56,18 +39,18 @@ export type SubscribedAppWithOverride = z.infer<
 >
 
 /**
- * Response schema for subscribing to a WhatsApp Business Account
- *
+ * Response when subscribing to WABA webhooks
  * @example
- * ```ts
- * const response = SubscribeToWABAResponseSchema.parse({
- *   success: true
- * })
+ * ```typescript
+ * const response = await client.webhooks.subscribe(wabaId, ['messages'])
+ * console.log(response)
+ * // Output:
+ * // {
+ * //   success: true
+ * // }
  * ```
  */
-export const SubscribeToWABAResponseSchema: z.ZodType<{
-	success: boolean
-}> = z.object({
+export const SubscribeToWABAResponseSchema = z.object({
 	/** Whether the subscription was successful */
 	success: z.boolean(),
 })
@@ -77,32 +60,24 @@ export type SubscribeToWABAResponse = z.infer<
 >
 
 /**
- * Response schema for getting all subscriptions for a WhatsApp Business Account
- *
+ * Response when getting WABA subscriptions
  * @example
- * ```ts
- * const response = GetSubscriptionsResponseSchema.parse({
- *   data: [
- *     {
- *       whatsapp_business_api_data: {
- *         id: "123456789",
- *         link: "https://example.com",
- *         name: "My App"
- *       }
- *     }
- *   ]
- * })
+ * ```typescript
+ * const subscriptions = await client.webhooks.getSubscriptions(wabaId)
+ * console.log(subscriptions)
+ * // Output:
+ * // {
+ * //   data: [{
+ * //     whatsapp_business_api_data: {
+ * //       id: '123456789',
+ * //       link: 'https://...',
+ * //       name: 'My App'
+ * //     }
+ * //   }]
+ * // }
  * ```
  */
-export const GetSubscriptionsResponseSchema: z.ZodType<{
-	data: Array<{
-		whatsapp_business_api_data: {
-			id: string
-			link: string
-			name: string
-		}
-	}>
-}> = z.object({
+export const GetSubscriptionsResponseSchema = z.object({
 	/** Array of subscribed apps */
 	data: z.array(SubscribedAppSchema),
 })
@@ -112,18 +87,18 @@ export type GetSubscriptionsResponse = z.infer<
 >
 
 /**
- * Response schema for unsubscribing from a WhatsApp Business Account
- *
+ * Response when unsubscribing from WABA webhooks
  * @example
- * ```ts
- * const response = UnsubscribeFromWABAResponseSchema.parse({
- *   success: true
- * })
+ * ```typescript
+ * const response = await client.webhooks.unsubscribe(wabaId)
+ * console.log(response)
+ * // Output:
+ * // {
+ * //   success: true
+ * // }
  * ```
  */
-export const UnsubscribeFromWABAResponseSchema: z.ZodType<{
-	success: boolean
-}> = z.object({
+export const UnsubscribeFromWABAResponseSchema = z.object({
 	/** Whether the unsubscription was successful */
 	success: z.boolean(),
 })
@@ -133,20 +108,17 @@ export type UnsubscribeFromWABAResponse = z.infer<
 >
 
 /**
- * Request schema for overriding the callback URL
- *
+ * Request to override callback URL for WABA webhooks
  * @example
- * ```ts
- * const request = OverrideCallbackURLRequestSchema.parse({
- *   override_callback_uri: "https://example.com/webhook",
- *   verify_token: "my-secret-token"
- * })
+ * ```typescript
+ * const override = {
+ *   override_callback_uri: 'https://my-server.com/webhook',
+ *   verify_token: 'my-verify-token'
+ * }
+ * const response = await client.webhooks.subscribe(wabaId, ['messages'], override)
  * ```
  */
-export const OverrideCallbackURLRequestSchema: z.ZodType<{
-	override_callback_uri: string
-	verify_token: string
-}> = z.object({
+export const OverrideCallbackURLRequestSchema = z.object({
 	/** The alternate webhook endpoint URL */
 	override_callback_uri: z.string().url(),
 	/** The verification token for the alternate webhook endpoint */
@@ -158,34 +130,25 @@ export type OverrideCallbackURLRequest = z.infer<
 >
 
 /**
- * Response schema for overriding the callback URL
- *
+ * Response when overriding callback URL for WABA webhooks
  * @example
- * ```ts
- * const response = OverrideCallbackURLResponseSchema.parse({
- *   data: [
- *     {
- *       override_callback_uri: "https://example.com/webhook",
- *       whatsapp_business_api_data: {
- *         id: "123456789",
- *         link: "https://facebook.com/app",
- *         name: "My App"
- *       }
- *     }
- *   ]
- * })
+ * ```typescript
+ * const subscriptions = await client.webhooks.getSubscriptions(wabaId)
+ * console.log(subscriptions)
+ * // Output:
+ * // {
+ * //   data: [{
+ * //     whatsapp_business_api_data: {
+ * //       id: '123456789',
+ * //       link: 'https://...',
+ * //       name: 'My App'
+ * //     },
+ * //     override_callback_uri: 'https://my-server.com/webhook'
+ * //   }]
+ * // }
  * ```
  */
-export const OverrideCallbackURLResponseSchema: z.ZodType<{
-	data: Array<{
-		whatsapp_business_api_data: {
-			id: string
-			link: string
-			name: string
-		}
-		override_callback_uri: string
-	}>
-}> = z.object({
+export const OverrideCallbackURLResponseSchema = z.object({
 	/** Array of subscribed apps with override callback URIs */
 	data: z.array(SubscribedAppWithOverrideSchema),
 })

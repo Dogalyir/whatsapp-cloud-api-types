@@ -3,9 +3,7 @@ import { z } from 'zod'
 /**
  * Contact profile object
  */
-export const ContactProfileSchema: z.ZodType<{
-	name: string
-}> = z.object({
+export const ContactProfileSchema = z.object({
 	/** Contact's profile name */
 	name: z.string(),
 })
@@ -15,10 +13,7 @@ export type ContactProfile = z.infer<typeof ContactProfileSchema>
 /**
  * Contact object
  */
-export const ContactSchema: z.ZodType<{
-	profile: { name: string }
-	wa_id: string
-}> = z.object({
+export const ContactSchema = z.object({
 	profile: ContactProfileSchema,
 	/** WhatsApp ID of the customer */
 	wa_id: z.string(),
@@ -29,10 +24,7 @@ export type Contact = z.infer<typeof ContactSchema>
 /**
  * Metadata object
  */
-export const MetadataSchema: z.ZodType<{
-	display_phone_number: string
-	phone_number_id: string
-}> = z.object({
+export const MetadataSchema = z.object({
 	/** The phone number of the business account receiving the webhook */
 	display_phone_number: z.string(),
 	/** The ID of the phone number receiving the webhook */
@@ -44,9 +36,7 @@ export type Metadata = z.infer<typeof MetadataSchema>
 /**
  * Text message object
  */
-export const TextMessageSchema: z.ZodType<{
-	body: string
-}> = z.object({
+export const TextMessageSchema = z.object({
 	/** The text body of the message */
 	body: z.string(),
 })
@@ -56,16 +46,7 @@ export type TextMessage = z.infer<typeof TextMessageSchema>
 /**
  * Media object (for images, videos, audio, documents, stickers)
  */
-export const MediaObjectSchema: z.ZodType<{
-	id: string
-	mime_type?: string
-	sha256?: string
-	caption?: string
-	filename?: string
-	voice?: boolean
-	url?: string
-	animated?: boolean
-}> = z.object({
+export const MediaObjectSchema = z.object({
 	/** Media ID */
 	id: z.string(),
 	/** MIME type of the media */
@@ -89,10 +70,7 @@ export type MediaObject = z.infer<typeof MediaObjectSchema>
 /**
  * Reaction object
  */
-export const ReactionSchema: z.ZodType<{
-	message_id: string
-	emoji: string
-}> = z.object({
+export const ReactionSchema = z.object({
 	/** The wamid of the message that was reacted to */
 	message_id: z.string(),
 	/** The emoji used for the reaction */
@@ -104,13 +82,7 @@ export type Reaction = z.infer<typeof ReactionSchema>
 /**
  * Location object
  */
-export const LocationSchema: z.ZodType<{
-	latitude: string | number
-	longitude: string | number
-	name?: string
-	address?: string
-	url?: string
-}> = z.object({
+export const LocationSchema = z.object({
 	/** Latitude of the location */
 	latitude: z.union([z.string(), z.number()]),
 	/** Longitude of the location */
@@ -128,16 +100,7 @@ export type Location = z.infer<typeof LocationSchema>
 /**
  * Context object (for forwarded messages or replies)
  */
-export const ContextSchema: z.ZodType<{
-	forwarded?: boolean
-	frequently_forwarded?: boolean
-	from?: string
-	id?: string
-	referred_product?: {
-		catalog_id: string
-		product_retailer_id: string
-	}
-}> = z.object({
+export const ContextSchema = z.object({
 	/** Set to true if the message was forwarded */
 	forwarded: z.boolean().optional(),
 	/** Set to true if the message was frequently forwarded */
@@ -160,10 +123,7 @@ export type Context = z.infer<typeof ContextSchema>
 /**
  * Button reply object
  */
-export const ButtonReplySchema: z.ZodType<{
-	id: string
-	title: string
-}> = z.object({
+export const ButtonReplySchema = z.object({
 	/** ID of the button */
 	id: z.string(),
 	/** Title text of the button */
@@ -175,11 +135,7 @@ export type ButtonReply = z.infer<typeof ButtonReplySchema>
 /**
  * List reply object
  */
-export const ListReplySchema: z.ZodType<{
-	id: string
-	title: string
-	description?: string
-}> = z.object({
+export const ListReplySchema = z.object({
 	/** ID of the list item */
 	id: z.string(),
 	/** Title of the list item */
@@ -193,11 +149,7 @@ export type ListReply = z.infer<typeof ListReplySchema>
 /**
  * Interactive object
  */
-export const InteractiveSchema: z.ZodType<{
-	type: 'button_reply' | 'list_reply'
-	button_reply?: { id: string; title: string }
-	list_reply?: { id: string; title: string; description?: string }
-}> = z.object({
+export const InteractiveSchema = z.object({
 	/** Type of interactive object */
 	type: z.enum(['button_reply', 'list_reply']),
 	/** Button reply object (if type is button_reply) */
@@ -211,15 +163,7 @@ export type Interactive = z.infer<typeof InteractiveSchema>
 /**
  * Error object
  */
-export const ErrorObjectSchema: z.ZodType<{
-	code: number
-	title?: string
-	message?: string
-	error_data?: {
-		details: string
-	}
-	href?: string
-}> = z.object({
+export const ErrorObjectSchema = z.object({
 	/** Error code */
 	code: z.number().int(),
 	/** Error title */
@@ -242,14 +186,7 @@ export type ErrorObject = z.infer<typeof ErrorObjectSchema>
 /**
  * Contact name object
  */
-export const ContactNameSchema: z.ZodType<{
-	formatted_name: string
-	first_name?: string
-	last_name?: string
-	middle_name?: string
-	suffix?: string
-	prefix?: string
-}> = z.object({
+export const ContactNameSchema = z.object({
 	/** Full formatted name */
 	formatted_name: z.string(),
 	/** First name */
@@ -269,11 +206,7 @@ export type ContactName = z.infer<typeof ContactNameSchema>
 /**
  * Contact phone object
  */
-export const ContactPhoneSchema: z.ZodType<{
-	phone?: string
-	type?: string
-	wa_id?: string
-}> = z.object({
+export const ContactPhoneSchema = z.object({
 	/** Phone number */
 	phone: z.string().optional(),
 	/** Type of phone (CELL, MAIN, IPHONE, HOME, WORK) */
@@ -287,11 +220,7 @@ export type ContactPhone = z.infer<typeof ContactPhoneSchema>
 /**
  * Contact organization object
  */
-export const ContactOrgSchema: z.ZodType<{
-	company?: string
-	department?: string
-	title?: string
-}> = z.object({
+export const ContactOrgSchema = z.object({
 	/** Company name */
 	company: z.string().optional(),
 	/** Department name */
@@ -305,15 +234,7 @@ export type ContactOrg = z.infer<typeof ContactOrgSchema>
 /**
  * Contact address object
  */
-export const ContactAddressSchema: z.ZodType<{
-	street?: string
-	city?: string
-	state?: string
-	zip?: string
-	country?: string
-	country_code?: string
-	type?: string
-}> = z.object({
+export const ContactAddressSchema = z.object({
 	/** Street address */
 	street: z.string().optional(),
 	/** City */
@@ -335,10 +256,7 @@ export type ContactAddress = z.infer<typeof ContactAddressSchema>
 /**
  * Contact email object
  */
-export const ContactEmailSchema: z.ZodType<{
-	email?: string
-	type?: string
-}> = z.object({
+export const ContactEmailSchema = z.object({
 	/** Email address */
 	email: z.string().optional(),
 	/** Email type (HOME, WORK) */
@@ -350,10 +268,7 @@ export type ContactEmail = z.infer<typeof ContactEmailSchema>
 /**
  * Contact URL object
  */
-export const ContactUrlSchema: z.ZodType<{
-	url?: string
-	type?: string
-}> = z.object({
+export const ContactUrlSchema = z.object({
 	/** URL */
 	url: z.string().optional(),
 	/** URL type (HOME, WORK) */
@@ -365,15 +280,7 @@ export type ContactUrl = z.infer<typeof ContactUrlSchema>
 /**
  * Contact item in contacts message
  */
-export const ContactItemSchema: z.ZodType<{
-	name: z.infer<typeof ContactNameSchema>
-	org?: z.infer<typeof ContactOrgSchema>
-	phones?: Array<z.infer<typeof ContactPhoneSchema>>
-	emails?: Array<z.infer<typeof ContactEmailSchema>>
-	urls?: Array<z.infer<typeof ContactUrlSchema>>
-	addresses?: Array<z.infer<typeof ContactAddressSchema>>
-	birthday?: string
-}> = z.object({
+export const ContactItemSchema = z.object({
 	/** Contact name */
 	name: ContactNameSchema,
 	/** Organization */
@@ -395,12 +302,7 @@ export type ContactItem = z.infer<typeof ContactItemSchema>
 /**
  * Product item in order
  */
-export const ProductItemSchema: z.ZodType<{
-	product_retailer_id: string
-	quantity: string | number
-	item_price: string | number
-	currency: string
-}> = z.object({
+export const ProductItemSchema = z.object({
 	/** Product retailer ID */
 	product_retailer_id: z.string(),
 	/** Quantity */
@@ -416,11 +318,7 @@ export type ProductItem = z.infer<typeof ProductItemSchema>
 /**
  * Order object
  */
-export const OrderSchema: z.ZodType<{
-	catalog_id: string
-	product_items: Array<z.infer<typeof ProductItemSchema>>
-	text?: string
-}> = z.object({
+export const OrderSchema = z.object({
 	/** Catalog ID */
 	catalog_id: z.string(),
 	/** Product items in the order */
@@ -434,15 +332,7 @@ export type Order = z.infer<typeof OrderSchema>
 /**
  * System message object
  */
-export const SystemMessageSchema: z.ZodType<{
-	body?: string
-	type?: string
-	wa_id?: string
-	customer?: string
-	identity?: string
-	user?: string
-	new_wa_id?: string
-}> = z.object({
+export const SystemMessageSchema = z.object({
 	/** System message body */
 	body: z.string().optional(),
 	/** Type of system message (customer_changed_number, customer_identity_changed, etc.) */
@@ -464,21 +354,7 @@ export type SystemMessage = z.infer<typeof SystemMessageSchema>
 /**
  * Referral object
  */
-export const ReferralSchema: z.ZodType<{
-	source_url?: string
-	source_id?: string
-	source_type?: string
-	headline?: string
-	body?: string
-	media_type?: string
-	image_url?: string
-	video_url?: string
-	thumbnail_url?: string
-	ctwa_clid?: string
-	welcome_message?: {
-		text: string
-	}
-}> = z.object({
+export const ReferralSchema = z.object({
 	/** Source URL */
 	source_url: z.string().optional(),
 	/** Source ID */
@@ -512,29 +388,7 @@ export type Referral = z.infer<typeof ReferralSchema>
 /**
  * Message object
  */
-export const MessageSchema: z.ZodType<{
-	from: string
-	id: string
-	timestamp: string
-	type: string
-	group_id?: string
-	context?: z.infer<typeof ContextSchema>
-	referral?: z.infer<typeof ReferralSchema>
-	text?: { body: string }
-	image?: z.infer<typeof MediaObjectSchema>
-	video?: z.infer<typeof MediaObjectSchema>
-	audio?: z.infer<typeof MediaObjectSchema>
-	document?: z.infer<typeof MediaObjectSchema>
-	sticker?: z.infer<typeof MediaObjectSchema>
-	location?: z.infer<typeof LocationSchema>
-	contacts?: Array<z.infer<typeof ContactItemSchema>>
-	interactive?: z.infer<typeof InteractiveSchema>
-	button?: { text: string; payload?: string }
-	reaction?: z.infer<typeof ReactionSchema>
-	order?: z.infer<typeof OrderSchema>
-	system?: z.infer<typeof SystemMessageSchema>
-	errors?: Array<z.infer<typeof ErrorObjectSchema>>
-}> = z.object({
+export const MessageSchema = z.object({
 	/** Sender's phone number */
 	from: z.string(),
 	/** Unique identifier of the message */
@@ -586,13 +440,7 @@ export type Message = z.infer<typeof MessageSchema>
 /**
  * Conversation object
  */
-export const ConversationSchema: z.ZodType<{
-	id: string
-	origin?: {
-		type: string
-	}
-	expiration_timestamp?: string
-}> = z.object({
+export const ConversationSchema = z.object({
 	/** Conversation ID */
 	id: z.string(),
 	/** Origin of the conversation */
@@ -611,11 +459,7 @@ export type Conversation = z.infer<typeof ConversationSchema>
 /**
  * Pricing object
  */
-export const PricingSchema: z.ZodType<{
-	pricing_model: string
-	billable: boolean
-	category: string
-}> = z.object({
+export const PricingSchema = z.object({
 	/** Pricing model (CBP, NBP, etc.) */
 	pricing_model: z.string(),
 	/** Whether the conversation is billable */
@@ -629,15 +473,7 @@ export type Pricing = z.infer<typeof PricingSchema>
 /**
  * Status object
  */
-export const StatusSchema: z.ZodType<{
-	id: string
-	recipient_id: string
-	status: 'read' | 'delivered' | 'sent' | 'failed' | 'deleted'
-	timestamp: string
-	conversation?: z.infer<typeof ConversationSchema>
-	pricing?: z.infer<typeof PricingSchema>
-	errors?: Array<z.infer<typeof ErrorObjectSchema>>
-}> = z.object({
+export const StatusSchema = z.object({
 	/** Message ID */
 	id: z.string(),
 	/** WhatsApp ID of the recipient */
@@ -659,14 +495,7 @@ export type Status = z.infer<typeof StatusSchema>
 /**
  * Value object for messages webhook
  */
-export const MessagesValueSchema: z.ZodType<{
-	messaging_product: 'whatsapp'
-	metadata: z.infer<typeof MetadataSchema>
-	contacts?: Array<z.infer<typeof ContactSchema>>
-	messages?: Array<z.infer<typeof MessageSchema>>
-	statuses?: Array<z.infer<typeof StatusSchema>>
-	errors?: Array<z.infer<typeof ErrorObjectSchema>>
-}> = z.object({
+export const MessagesValueSchema = z.object({
 	/** Messaging product (always "whatsapp") */
 	messaging_product: z.literal('whatsapp'),
 	/** Metadata about the phone number */
@@ -686,10 +515,7 @@ export type MessagesValue = z.infer<typeof MessagesValueSchema>
 /**
  * Change object for messages webhook
  */
-export const MessagesChangeSchema: z.ZodType<{
-	value: z.infer<typeof MessagesValueSchema>
-	field: 'messages'
-}> = z.object({
+export const MessagesChangeSchema = z.object({
 	value: MessagesValueSchema,
 	field: z.literal('messages'),
 })
@@ -699,10 +525,7 @@ export type MessagesChange = z.infer<typeof MessagesChangeSchema>
 /**
  * Entry object for messages webhook
  */
-export const MessagesEntrySchema: z.ZodType<{
-	id: string
-	changes: Array<z.infer<typeof MessagesChangeSchema>>
-}> = z.object({
+export const MessagesEntrySchema = z.object({
 	/** WhatsApp Business Account ID */
 	id: z.string(),
 	/** Array of changes */
@@ -714,10 +537,7 @@ export type MessagesEntry = z.infer<typeof MessagesEntrySchema>
 /**
  * Complete webhook payload for messages
  */
-export const MessagesWebhookSchema: z.ZodType<{
-	object: 'whatsapp_business_account'
-	entry: Array<z.infer<typeof MessagesEntrySchema>>
-}> = z.object({
+export const MessagesWebhookSchema = z.object({
 	object: z.literal('whatsapp_business_account'),
 	entry: z.array(MessagesEntrySchema),
 })

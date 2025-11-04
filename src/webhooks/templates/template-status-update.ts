@@ -3,21 +3,7 @@ import { z } from 'zod'
 /**
  * Template status event types
  */
-export const TemplateStatusEventSchema: z.ZodType<
-	| 'APPROVED'
-	| 'ARCHIVED'
-	| 'DELETED'
-	| 'DISABLED'
-	| 'FLAGGED'
-	| 'IN_APPEAL'
-	| 'LIMIT_EXCEEDED'
-	| 'LOCKED'
-	| 'PAUSED'
-	| 'PENDING'
-	| 'REINSTATED'
-	| 'PENDING_DELETION'
-	| 'REJECTED'
-> = z.enum([
+export const TemplateStatusEventSchema = z.enum([
 	'APPROVED',
 	'ARCHIVED',
 	'DELETED',
@@ -38,16 +24,7 @@ export type TemplateStatusEvent = z.infer<typeof TemplateStatusEventSchema>
 /**
  * Template rejection/disabling reasons
  */
-export const TemplateReasonSchema: z.ZodType<
-	| 'ABUSIVE_CONTENT'
-	| 'CATEGORY_NOT_AVAILABLE'
-	| 'INCORRECT_CATEGORY'
-	| 'INVALID_FORMAT'
-	| 'NONE'
-	| 'PROMOTIONAL'
-	| 'SCAM'
-	| 'TAG_CONTENT_MISMATCH'
-> = z.enum([
+export const TemplateReasonSchema = z.enum([
 	'ABUSIVE_CONTENT',
 	'CATEGORY_NOT_AVAILABLE',
 	'INCORRECT_CATEGORY',
@@ -63,9 +40,7 @@ export type TemplateReason = z.infer<typeof TemplateReasonSchema>
 /**
  * Template disable information
  */
-export const TemplateDisableInfoSchema: z.ZodType<{
-	disable_date: number
-}> = z.object({
+export const TemplateDisableInfoSchema = z.object({
 	/** Unix timestamp indicating when the template was disabled */
 	disable_date: z.number().int(),
 })
@@ -75,13 +50,7 @@ export type TemplateDisableInfo = z.infer<typeof TemplateDisableInfoSchema>
 /**
  * Template lock/unlock information titles
  */
-export const TemplateOtherInfoTitleSchema: z.ZodType<
-	| 'FIRST_PAUSE'
-	| 'SECOND_PAUSE'
-	| 'RATE_LIMITING_PAUSE'
-	| 'UNPAUSE'
-	| 'DISABLED'
-> = z.enum([
+export const TemplateOtherInfoTitleSchema = z.enum([
 	'FIRST_PAUSE',
 	'SECOND_PAUSE',
 	'RATE_LIMITING_PAUSE',
@@ -96,10 +65,7 @@ export type TemplateOtherInfoTitle = z.infer<
 /**
  * Template lock/unlock information
  */
-export const TemplateOtherInfoSchema: z.ZodType<{
-	title: z.infer<typeof TemplateOtherInfoTitleSchema>
-	description: string
-}> = z.object({
+export const TemplateOtherInfoSchema = z.object({
 	/** Title of the pause or unpause event */
 	title: TemplateOtherInfoTitleSchema,
 	/** Description of why the template was locked or unlocked */
@@ -111,15 +77,7 @@ export type TemplateOtherInfo = z.infer<typeof TemplateOtherInfoSchema>
 /**
  * Template status update value object
  */
-export const TemplateStatusUpdateValueSchema: z.ZodType<{
-	event: z.infer<typeof TemplateStatusEventSchema>
-	message_template_id: number
-	message_template_name: string
-	message_template_language: string
-	reason?: z.infer<typeof TemplateReasonSchema>
-	disable_info?: z.infer<typeof TemplateDisableInfoSchema>
-	other_info?: z.infer<typeof TemplateOtherInfoSchema>
-}> = z.object({
+export const TemplateStatusUpdateValueSchema = z.object({
 	/** The status event for the template */
 	event: TemplateStatusEventSchema,
 	/** The ID of the message template */
@@ -143,10 +101,7 @@ export type TemplateStatusUpdateValue = z.infer<
 /**
  * Change object for template status update
  */
-export const TemplateStatusUpdateChangeSchema: z.ZodType<{
-	value: z.infer<typeof TemplateStatusUpdateValueSchema>
-	field: 'message_template_status_update'
-}> = z.object({
+export const TemplateStatusUpdateChangeSchema = z.object({
 	value: TemplateStatusUpdateValueSchema,
 	field: z.literal('message_template_status_update'),
 })
@@ -158,11 +113,7 @@ export type TemplateStatusUpdateChange = z.infer<
 /**
  * Entry object for template status update
  */
-export const TemplateStatusUpdateEntrySchema: z.ZodType<{
-	id: string
-	time: number
-	changes: Array<z.infer<typeof TemplateStatusUpdateChangeSchema>>
-}> = z.object({
+export const TemplateStatusUpdateEntrySchema = z.object({
 	/** The WhatsApp Business Account ID */
 	id: z.string(),
 	/** Unix timestamp indicating when the webhook was triggered */
@@ -177,10 +128,7 @@ export type TemplateStatusUpdateEntry = z.infer<
 /**
  * Complete webhook payload for message_template_status_update
  */
-export const MessageTemplateStatusUpdateWebhookSchema: z.ZodType<{
-	object: 'whatsapp_business_account'
-	entry: Array<z.infer<typeof TemplateStatusUpdateEntrySchema>>
-}> = z.object({
+export const MessageTemplateStatusUpdateWebhookSchema = z.object({
 	object: z.literal('whatsapp_business_account'),
 	entry: z.array(TemplateStatusUpdateEntrySchema),
 })

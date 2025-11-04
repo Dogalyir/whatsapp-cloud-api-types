@@ -154,7 +154,7 @@ function handleMessage(message: Message) {
 
 // Example 4: Handling template status updates
 function handleTemplateStatusUpdate(
-	value: any, // Use the actual type from the schema
+	value: Record<string, unknown>, // Use the actual type from the schema
 ) {
 	console.log('📋 Template Status Update')
 	console.log('Template:', value.message_template_name)
@@ -195,7 +195,7 @@ function handleTemplateStatusUpdate(
 }
 
 // Example 5: Handling template quality updates
-function _handleTemplateQualityUpdate(value: any) {
+function _handleTemplateQualityUpdate(value: Record<string, unknown>) {
 	console.log('📊 Template Quality Update')
 	console.log('Template:', value.message_template_name)
 	console.log(
@@ -214,7 +214,7 @@ function _handleTemplateQualityUpdate(value: any) {
 }
 
 // Example 6: Handling template components updates
-function handleTemplateComponentsUpdate(value: any) {
+function handleTemplateComponentsUpdate(value: Record<string, unknown>) {
 	console.log('🔧 Template Components Update')
 	console.log('Template:', value.message_template_name)
 	console.log('Language:', value.message_template_language)
@@ -231,24 +231,26 @@ function handleTemplateComponentsUpdate(value: any) {
 
 	if (value.message_template_buttons) {
 		console.log('Buttons:')
-		value.message_template_buttons.forEach((button: any, index: number) => {
-			console.log(
-				`  ${index + 1}. [${button.message_template_button_type}] ${button.message_template_button_text}`,
-			)
-			if (button.message_template_button_url) {
-				console.log(`     URL: ${button.message_template_button_url}`)
-			}
-			if (button.message_template_button_phone_number) {
+		;(value.message_template_buttons as Array<Record<string, unknown>>).forEach(
+			(button, index: number) => {
 				console.log(
-					`     Phone: ${button.message_template_button_phone_number}`,
+					`  ${index + 1}. [${button.message_template_button_type}] ${button.message_template_button_text}`,
 				)
-			}
-		})
+				if (button.message_template_button_url) {
+					console.log(`     URL: ${button.message_template_button_url}`)
+				}
+				if (button.message_template_button_phone_number) {
+					console.log(
+						`     Phone: ${button.message_template_button_phone_number}`,
+					)
+				}
+			},
+		)
 	}
 }
 
 // Example 7: Handling template category updates
-function handleTemplateCategoryUpdate(value: any) {
+function handleTemplateCategoryUpdate(value: Record<string, unknown>) {
 	console.log('📁 Template Category Update')
 	console.log('Template:', value.message_template_name)
 

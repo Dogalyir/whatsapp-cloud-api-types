@@ -3,22 +3,19 @@ import { z } from 'zod'
 /**
  * Template quality score values
  */
-export const TemplateQualityScoreSchema: z.ZodType<
-	'GREEN' | 'RED' | 'YELLOW' | 'UNKNOWN'
-> = z.enum(['GREEN', 'RED', 'YELLOW', 'UNKNOWN'])
+export const TemplateQualityScoreSchema = z.enum([
+	'GREEN',
+	'RED',
+	'YELLOW',
+	'UNKNOWN',
+])
 
 export type TemplateQualityScore = z.infer<typeof TemplateQualityScoreSchema>
 
 /**
  * Template quality update value object
  */
-export const TemplateQualityUpdateValueSchema: z.ZodType<{
-	previous_quality_score: z.infer<typeof TemplateQualityScoreSchema>
-	new_quality_score: z.infer<typeof TemplateQualityScoreSchema>
-	message_template_id: number
-	message_template_name: string
-	message_template_language: string
-}> = z.object({
+export const TemplateQualityUpdateValueSchema = z.object({
 	/** Previous template quality score */
 	previous_quality_score: TemplateQualityScoreSchema,
 	/** New template quality score */
@@ -38,10 +35,7 @@ export type TemplateQualityUpdateValue = z.infer<
 /**
  * Change object for template quality update
  */
-export const TemplateQualityUpdateChangeSchema: z.ZodType<{
-	value: z.infer<typeof TemplateQualityUpdateValueSchema>
-	field: 'message_template_status_update'
-}> = z.object({
+export const TemplateQualityUpdateChangeSchema = z.object({
 	value: TemplateQualityUpdateValueSchema,
 	field: z.literal('message_template_status_update'),
 })
@@ -53,11 +47,7 @@ export type TemplateQualityUpdateChange = z.infer<
 /**
  * Entry object for template quality update
  */
-export const TemplateQualityUpdateEntrySchema: z.ZodType<{
-	id: string
-	time: number
-	changes: Array<z.infer<typeof TemplateQualityUpdateChangeSchema>>
-}> = z.object({
+export const TemplateQualityUpdateEntrySchema = z.object({
 	/** WhatsApp Business Account ID */
 	id: z.string(),
 	/** Unix timestamp indicating when the webhook was triggered */
@@ -72,10 +62,7 @@ export type TemplateQualityUpdateEntry = z.infer<
 /**
  * Complete webhook payload for message_template_quality_update
  */
-export const MessageTemplateQualityUpdateWebhookSchema: z.ZodType<{
-	object: 'whatsapp_business_account'
-	entry: Array<z.infer<typeof TemplateQualityUpdateEntrySchema>>
-}> = z.object({
+export const MessageTemplateQualityUpdateWebhookSchema = z.object({
 	object: z.literal('whatsapp_business_account'),
 	entry: z.array(TemplateQualityUpdateEntrySchema),
 })
